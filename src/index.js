@@ -59,7 +59,12 @@ class HttpPlugin extends Plugin {
     async startServer(server, options) {
         return new Promise((resolve, reject) => {
             try {
-                server.listen(options.port, () => resolve(true));
+                let args = [options.port];
+                if (options.host) {
+                    args.push(options.host);
+                }
+                args.push(() => resolve(true));
+                server.listen(...args);
             } catch (error) {
                 reject(error);
             }
@@ -72,7 +77,7 @@ class HttpPlugin extends Plugin {
             try {
                 const server = await container.get(`http.server.${name}`);
                 await this.stopServer(server);
-            } catch (error) { }
+            } catch (error) {}
         }
     }
 
