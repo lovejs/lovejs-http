@@ -16,7 +16,8 @@ class ControllerMiddleware extends Middleware {
                     properties: {
                         controller: { type: "string" },
                         method: { type: "string" },
-                        args: { type: "array" }
+                        args: { type: "array" },
+                        setBody: { type: "boolean" }
                     }
                 }
             ]
@@ -37,7 +38,7 @@ class ControllerMiddleware extends Middleware {
         return _.merge(inheritOptions || {}, options);
     }
 
-    getMiddleware({ controller, method, ...args }) {
+    getMiddleware({ controller, method, setBody, ...args }) {
         return async context => {
             const service = await this.container.get(controller);
             if (!service) {
@@ -49,7 +50,12 @@ class ControllerMiddleware extends Middleware {
             }
 
             const callable = method ? service[method] : service;
-            return await callable.apply(service, [context, context.getPathParameters(), args]);
+            const res = await callable.apply(service, [context, context.getPathParameters(), args]);
+            if (setBody) {
+                context.body = res;
+            }
+
+            return res;
         };
     }
 }

@@ -5,7 +5,11 @@ const { Middleware } = require("@lovejs/components/middlewares");
 class KoaMiddleware extends Middleware {
     constructor(module) {
         super();
-        this.middleware = require(module);
+        try {
+            this.middleware = require(module);
+        } catch (e) {
+            console.error("Missing koa middleware ", e);
+        }
     }
 
     getMiddleware(options) {
