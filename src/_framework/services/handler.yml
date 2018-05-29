@@ -5,8 +5,8 @@ services:
         shared: false
         args:
             - !service emitter
-            - !service http.router
             - !service http.context.builder
+            - !service http.router
             - !service http.middlewares.resolver
             - !service logger
     

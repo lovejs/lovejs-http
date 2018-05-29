@@ -3,10 +3,10 @@ const statuses = require("statuses");
 const Stream = require("stream");
 
 class Handler {
-    constructor(emitter, router, contextBuilder, middlewaresResolver, logger) {
+    constructor(emitter, contextBuilder, router, middlewaresResolver, logger) {
         this.emitter = emitter;
-        this.router = router;
         this.contextBuilder = contextBuilder;
+        this.router = router;
         this.resolver = middlewaresResolver;
         this.logger = logger;
     }
@@ -19,7 +19,10 @@ class Handler {
         return async (request, response) => {
             const context = await this.contextBuilder.getContext(request, response);
             let currentError = false;
+            let timers = [];
+
             await this.emitter.emit("http.context.start", { context });
+
             try {
                 this.logger.debug(`:arrow_lower_right:  ${context.url}`);
 
@@ -30,10 +33,8 @@ class Handler {
                 const middlewares = _.toPairs(context.getAttribute("_middlewares"));
 
                 let timer = +new Date();
-                const timers = [];
                 await this.resolver.processMiddlewares(middlewares, [context], middleware => {
-                    const entry = { [middleware]: +new Date() - timer };
-                    timers.push(entry);
+                    timers.push({ middleware, time: +new Date() - timer });
                     timer = +new Date();
                 });
                 this.sendResponse(context);
@@ -43,7 +44,8 @@ class Handler {
                 this.logger.renderError(error);
                 this.sendError(context, error);
             }
-            await this.emitter.emit("http.context.finish", { context, error: currentError });
+
+            await this.emitter.emit("http.context.finish", { context, timers, error: currentError });
         };
     }
 
