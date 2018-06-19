@@ -4,8 +4,5 @@ imports:
     - handler.yml
     - context.yml
     - router.yml
-    - middlewares.yml
-    - cupidon.yml
-    # - listeners.yml
-    
+    - middlewares.yml    
     

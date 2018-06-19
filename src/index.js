@@ -10,7 +10,7 @@ const {
 class HttpPlugin extends Plugin {
     async registerServices(container, origin) {
         await container.loadDefinitions(this.getPluginDir("/_framework/services/services.yml"), origin);
-
+        
         const servers = this.get("servers");
         for (let name in servers) {
             const configuration = servers[name];
@@ -34,6 +34,10 @@ class HttpPlugin extends Plugin {
             service.setArgs([koaMiddlewares[name]]);
             service.addTag(new Tag("http.middleware", { name }));
             container.setService(serviceName, service);
+        }
+
+        if (this.hasPlugin('cupidon')) {
+            await container.loadDefinitions(this.getPluginDir("/_framework/services/cupidon.yml"), origin);
         }
     }
 
