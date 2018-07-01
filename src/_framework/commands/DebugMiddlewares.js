@@ -21,7 +21,7 @@ class DebugMiddlewaresCommand extends Command {
 
     register(program) {
         program
-            .command("debug:middlewares")
+            .command("http:middlewares:list")
             .description("Return list of availables middlewares")
             .action(this.execute.bind(this));
     }

@@ -20,7 +20,7 @@ class DebugRouterCommand extends Command {
 
     register(program) {
         program
-            .command("debug:router")
+            .command("http:router:routes")
             .description("Return the list of routes from the router")
             .action(this.execute.bind(this));
     }

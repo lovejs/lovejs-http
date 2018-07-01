@@ -1,10 +1,10 @@
 services:    
     command.debug.router:
-        module: !plugin_dir /Commands/DebugRouter
+        module: !plugin_dir /_framework/commands/DebugRouter
         args:   [ !service container ]
         tags:   love.command
 
     command.debug.middlewares:
-        module: !plugin_dir /Commands/DebugMiddlewares
+        module: !plugin_dir /_framework/commands/DebugMiddlewares
         args:   [ !services { tag: route.middleware } ]
         tags:   love.command
