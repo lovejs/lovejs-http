@@ -36,6 +36,7 @@ class HttpPlugin extends Plugin {
         }
 
         if (this.hasPlugin("cupidon")) {
+            container.setParameter("http.cupidon.config", this.get("cupidon"));
             await container.loadDefinitions(this.getPluginDir("/_framework/services/cupidon.yml"), origin);
         }
     }
@@ -52,9 +53,9 @@ class HttpPlugin extends Plugin {
             const server = await container.get(`http.server.${name}`);
             try {
                 await this.startServer(server, listen);
-                logger.info(`HTTP Server ${name} listening on ${JSON.stringify(listen)}`);
+                logger.info({ message: `HTTP Server ${name} listening`, ...listen });
             } catch (error) {
-                logger.error(`HTTP Server ${name} failed to start on ${JSON.stringify(listen)} : ${error.message}`);
+                logger.error({ message: `HTTP Server ${name} failed to start : ${error.message}`, error, ...listen });
             }
         }
     }

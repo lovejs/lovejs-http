@@ -5,8 +5,9 @@ const { errorToJSON } = require("json-error");
 const CupidonExtension = require("@lovejs/cupidon/src/Cupidon/CupidonExtension");
 
 class CupidonHttp extends CupidonExtension {
-    constructor(container, projectDir) {
+    constructor(config, container, projectDir) {
         super();
+        this.config = config;
         this.contexts = [];
         this.backlogSize = 1000;
         this.container = container;
@@ -38,7 +39,9 @@ class CupidonHttp extends CupidonExtension {
 
     async getServers() {
         return this.container.getServicesTags("http.server").map(({ id, service, tag }) => {
-            let { configuration: { factory, handler, uws, listen } } = tag.getData();
+            let {
+                configuration: { factory, handler, uws, listen }
+            } = tag.getData();
 
             return {
                 service: id,
@@ -46,7 +49,7 @@ class CupidonHttp extends CupidonExtension {
                 handler,
                 uws,
                 listen
-            }
+            };
         });
     }
 
@@ -75,14 +78,28 @@ class CupidonHttp extends CupidonExtension {
         switch (query) {
             case "initial":
                 return await this.getDataInitial();
-                break;
             case "context":
                 return await this.getDataContext(context);
-                break;
         }
     }
 
+    isContextExcluded(context) {
+        const { exclude } = this.config;
+        if (exclude) {
+            const reg = new RegExp(exclude);
+            if (reg.test(context.path)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     serializeContext(context, error, data = {}) {
+        if (this.isContextExcluded(context)) {
+            return false;
+        }
+
         if (!context.getAttribute("_cupidon_id")) {
             context.setAttribute("_cupidon_id", shortid.generate());
         }
@@ -111,14 +128,18 @@ class CupidonHttp extends CupidonExtension {
 
     handleContextStart({ data: { context } }) {
         const data = this.serializeContext(context);
-        this.addContext(data);
-        this.emit(data);
+        if (data) {
+            this.addContext(data);
+            this.emit(data);
+        }
     }
 
     handleContextEnd({ data: { context, error } }) {
         const data = this.serializeContext(context, error);
-        this.addContext(data);
-        this.emit(data);
+        if (data) {
+            this.addContext(data);
+            this.emit(data);
+        }
     }
 }
 

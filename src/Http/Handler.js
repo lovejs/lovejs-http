@@ -24,8 +24,6 @@ class Handler {
             await this.emitter.emit("http.context.start", { context });
 
             try {
-                this.logger.debug(`:arrow_lower_right:  ${context.url}`);
-
                 const route = await this.router.getMatchingRoute(context);
                 if (!route) {
                     return context.throw(404, "Not found");
@@ -38,11 +36,12 @@ class Handler {
                     timer = +new Date();
                 });
                 this.sendResponse(context);
+                this.logger.debug({ message: "HTTP request", path: context.path, method: context.method, status: context.status });
             } catch (error) {
                 currentError = error;
-                this.logger.error(error.message);
-                this.logger.renderError(error);
+                this.logger.error({ message: error, path: context.path, method: context.method, status: context.status });
                 this.sendError(context, error);
+                this.logger.renderError(error);
             }
 
             await this.emitter.emit("http.context.finish", { context, timers, error: currentError });

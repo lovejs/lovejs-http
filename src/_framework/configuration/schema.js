@@ -82,6 +82,16 @@ module.exports = {
                     }
                 }
             }
+        },
+        cupidon: {
+            type: "object",
+            title: "Cupidon configuration",
+            properties: {
+                exclude: {
+                    type: "string",
+                    description: "Path pattern to exclude from cupidon"
+                }
+            }
         }
     },
     additionalProperties: false,

@@ -6,8 +6,8 @@ import { Link } from "react-router-dom";
 import Panel from "components/Panel/Panel";
 import { getServiceLink } from "./love";
 
+import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
 import Button from "@material-ui/core/Button";
 
 import List from "@material-ui/core/List";
@@ -25,9 +25,6 @@ import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
-
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
 
 class ContextDialog extends React.Component {
     render() {
@@ -56,6 +53,40 @@ class ContextDialog extends React.Component {
         );
     }
 }
+
+const styles = theme => ({
+    context_button: {
+        padding: "8px",
+        lineHeight: "10px",
+        minHeight: "auto",
+        fontWeight: "bold",
+        fontSize: "12px",
+        fontFamily: "monospace"
+    },
+    bg_success: {
+        backgroundColor: theme.palette.success.main
+    },
+    bg_error: {
+        backgroundColor: theme.palette.error.main
+    },
+    fg_success: {
+        color: theme.palette.success.main
+    },
+    fg_error: {
+        color: theme.palette.error.main
+    }
+});
+
+const getColorClass = status => {
+    switch (status / 100) {
+        case 2:
+        case 3:
+            return "success";
+        case 4:
+        case 5:
+            return "error";
+    }
+};
 
 class HttpComponent extends React.Component {
     state = {
@@ -116,14 +147,7 @@ class HttpComponent extends React.Component {
             data: { contexts, middlewares, servers },
             context
         } = this.state;
-
-        /*
-            service: id,
-            factory,
-            handler,
-            uws,
-            listen
-        */
+        const { classes } = this.props;
 
         return (
             <Grid container spacing={16}>
@@ -132,11 +156,21 @@ class HttpComponent extends React.Component {
                     <Panel title="HTTP Servers" color="">
                         {servers.map(({ service, factory, handler, uws, listen }, idx) => (
                             <List dense={true} key={service}>
-                                <ListItem><ListItemText primary={service} secondary="Service Id" /></ListItem>
-                                <ListItem><ListItemText primary={factory} secondary="Factory Service" /></ListItem>
-                                <ListItem><ListItemText primary={handler} secondary="Handler Service" /></ListItem>
-                                <ListItem><ListItemText primary={uws ? "yes" : "no"} secondary="UWS" /></ListItem>
-                                <ListItem><ListItemText primary={`${listen.host}:${listen.port}`} secondary="Listening" /></ListItem>
+                                <ListItem>
+                                    <ListItemText primary={service} secondary="Service Id" />
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText primary={factory} secondary="Factory Service" />
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText primary={handler} secondary="Handler Service" />
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText primary={uws ? "yes" : "no"} secondary="UWS" />
+                                </ListItem>
+                                <ListItem>
+                                    <ListItemText primary={`${listen.host}:${listen.port}`} secondary="Listening" />
+                                </ListItem>
                             </List>
                         ))}
                     </Panel>
@@ -168,7 +202,7 @@ class HttpComponent extends React.Component {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell>ID</TableCell>
+                                    <TableCell>Context #</TableCell>
                                     <TableCell>Method</TableCell>
                                     <TableCell>Path</TableCell>
                                     <TableCell>Status</TableCell>
@@ -183,9 +217,10 @@ class HttpComponent extends React.Component {
                                         <TableRow key={context.id}>
                                             <TableCell>
                                                 <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    color="primary"
+                                                    className={[
+                                                        classes.context_button,
+                                                        classes[`bg_${getColorClass(context.status)}`]
+                                                    ].join(" ")}
                                                     onClick={() => this.openContext(context.id)}
                                                 >
                                                     {context.id}
@@ -193,7 +228,9 @@ class HttpComponent extends React.Component {
                                             </TableCell>
                                             <TableCell>{context.method}</TableCell>
                                             <TableCell>{context.path}</TableCell>
-                                            <TableCell>{context.status}</TableCell>
+                                            <TableCell className={classes[`fg_${getColorClass(context.status)}`]}>
+                                                {context.status}
+                                            </TableCell>
                                             <TableCell>{context.time}</TableCell>
                                             <TableCell>{context.attributes._route_name}</TableCell>
                                             <TableCell>{context.error ? context.error.message : ""}</TableCell>
@@ -209,4 +246,4 @@ class HttpComponent extends React.Component {
     }
 }
 
-export default HttpComponent;
+export default withStyles(styles)(HttpComponent);
